@@ -163,6 +163,17 @@
     <h1>日语语法点速查</h1>
     <input type="text" id="searchInput" placeholder="搜索语法点、解释、例句等...">
 
+    <div id="filterContainer" style="text-align: center; margin-bottom: 20px;">
+        <label for="chapterFilter" style="margin-right: 10px; font-weight: bold; color: #555;">按章节筛选:</label>
+        <select id="chapterFilter" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc; font-size: 1em; outline: none;">
+            <option value="all">所有章节</option>
+        </select>
+    </div>
+
+    <div id="totalCount" style="text-align: center; margin-bottom: 20px; font-size: 1.1em; color: #555;">
+        总数: <span id="currentCount">0</span>
+    </div>
+
     <div id="grammarList">
         <!-- Grammar points will be dynamically loaded here -->
         <div class="no-results">正在加载语法数据...</div>
@@ -172,7 +183,9 @@
         let grammarData = []; // Declare grammarData globally, but initialize it empty
 
         const searchInput = document.getElementById('searchInput');
+        const chapterFilter = document.getElementById('chapterFilter');
         const grammarListDiv = document.getElementById('grammarList');
+        const currentCountSpan = document.getElementById('currentCount');
 
         function createListItem(label, content) {
             if (!content) return '';
@@ -217,6 +230,7 @@
             grammarListDiv.innerHTML = ''; // Clear previous results
             if (data.length === 0) {
                 grammarListDiv.innerHTML = '<div class="no-results">没有找到匹配的语法点。</div>';
+                currentCountSpan.textContent = 0;
                 return;
             }
 
@@ -230,6 +244,7 @@
                     <div>
                         ${point.pattern}
                         ${point.readings ? `<span class="readings">${point.readings}</span>` : ''}
+                        ${point.chapter ? `<span class="chapter-info" style="font-size: 0.6em; color: #0056b3; margin-left: 15px; padding: 3px 8px; background-color: #cce5ff; border-radius: 5px;">章节: ${point.chapter}</span>` : ''}
                     </div>
                     <span class="toggle-icon">▶</span>
                 `;
@@ -252,13 +267,16 @@
 
                 grammarListDiv.appendChild(grammarPointDiv);
             });
+            currentCountSpan.textContent = data.length; // Update total count
         }
 
         function filterGrammarPoints() {
             const searchTerm = searchInput.value.toLowerCase();
+            const selectedChapter = chapterFilter.value;
+            const selectedChapterNum = selectedChapter === 'all' ? 'all' : parseInt(selectedChapter);
+
             const filteredData = grammarData.filter(point => {
-                // Check if the search term exists in any of the relevant fields
-                return (
+                const matchesSearch = (
                     point.pattern.toLowerCase().includes(searchTerm) ||
                     (point.readings && point.readings.toLowerCase().includes(searchTerm)) ||
                     (point.connection_rules && point.connection_rules.toLowerCase().includes(searchTerm)) ||
@@ -266,6 +284,10 @@
                     (point.examples && point.examples.toLowerCase().includes(searchTerm)) ||
                     (point.usage_notes && point.usage_notes.toLowerCase().includes(searchTerm))
                 );
+
+                const matchesChapter = (selectedChapterNum === 'all' || point.chapter === selectedChapterNum);
+
+                return matchesSearch && matchesChapter;
             });
             displayGrammarPoints(filteredData);
         }
@@ -284,10 +306,21 @@
             .then(data => {
                 // 数据加载成功后，将其赋值给 grammarData 变量
                 grammarData = data;
+
+                // Populate chapter filter options
+                const chapters = [...new Set(grammarData.map(point => point.chapter).filter(Boolean))].sort((a, b) => a - b);
+                chapters.forEach(chapter => {
+                    const option = document.createElement('option');
+                    option.value = chapter;
+                    option.textContent = `章节 ${chapter}`;
+                    chapterFilter.appendChild(option);
+                });
+
                 // 显示初始的语法点列表
                 displayGrammarPoints(grammarData);
-                // 在数据加载完成后，再绑定搜索框的事件监听器
+                // 在数据加载完成后，再绑定搜索框和章节筛选器的事件监听器
                 searchInput.addEventListener('input', filterGrammarPoints);
+                chapterFilter.addEventListener('change', filterGrammarPoints);
             })
             .catch(error => {
                 // 捕获加载过程中可能发生的错误
