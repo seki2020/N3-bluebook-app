@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日语语法点列表 (折叠版)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans CJK JP', 'Noto Sans CJK SC', sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #searchInput {
+            width: 80%;
+            max-width: 600px;
+            padding: 12px 15px;
+            margin: 0 auto 30px auto;
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            font-size: 1.1em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        #searchInput:focus {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+        }
+
+        #grammarList {
+            max-width: 900px; /* Adjust max-width for better readability on wide screens */
+            margin: 0 auto;
+        }
+
+        .grammar-point {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow: hidden; /* Ensures content doesn't spill during collapse */
+        }
+
+        .grammar-point-header {
+            padding: 15px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e9f5ff; /* Light blue background for header */
+            border-bottom: 1px solid #d0e8ff;
+            color: #0056b3; /* Darker blue text */
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .grammar-point-header:hover {
+            background-color: #dbeaff;
+        }
+
+        .grammar-point-header .readings {
+            font-size: 0.7em;
+            color: #4da6ff;
+            margin-left: 10px;
+            font-weight: normal;
+        }
+
+        .toggle-icon {
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+            color: #007bff;
+        }
+
+        .grammar-point.expanded .toggle-icon {
+            transform: rotate(90deg); /* Rotate icon when expanded */
+        }
+
+        .grammar-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 0;
+            padding: 0 25px; /* Padding will animate with max-height */
+            background-color: #ffffff;
+            border-top: none;
+        }
+
+        .grammar-point.expanded .grammar-details {
+            max-height: 2000px; /* Large enough value to show all content */
+            opacity: 1;
+            padding-bottom: 20px; /* Add bottom padding when expanded */
+        }
+
+        .grammar-details h3 {
+            color: #495057;
+            font-size: 1.1em;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .grammar-details ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .grammar-details li {
+            margin-bottom: 5px;
+            white-space: pre-wrap; /* Preserves line breaks in text */
+        }
+
+        .grammar-details .example-item {
+            border-left: 3px solid #ced4da;
+            padding-left: 10px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .grammar-details .example-item .japanese {
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        .grammar-details .example-item .chinese {
+            font-style: italic;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .grammar-details .source {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .no-results {
+            text-align: center;
+            font-size: 1.2em;
+            color: #888;
+            padding: 50px;
+        }
+    </style>
+</head>
+<body>
+    <h1>日语语法点速查</h1>
+    <input type="text" id="searchInput" placeholder="搜索语法点、解释、例句等...">
+
+    <div id="grammarList">
+        <!-- Grammar points will be dynamically loaded here -->
+        <div class="no-results">正在加载语法数据...</div>
+    </div>
+
+    <script>
+        let grammarData = []; // Declare grammarData globally, but initialize it empty
+
+        const searchInput = document.getElementById('searchInput');
+        const grammarListDiv = document.getElementById('grammarList');
+
+        function createListItem(label, content) {
+            if (!content) return '';
+            return `
+                <h3>${label}</h3>
+                <ul>
+                    <li>${content.split('\n').map(item => `<span>${item}</span>`).join('<br>')}</li>
+                </ul>
+            `;
+        }
+
+        function createExampleItem(examplesContent) {
+            if (!examplesContent) return '';
+            const examplesHtml = examplesContent.split('\n\n').map(example => {
+                const parts = example.split(' CH: ');
+                let japanese = parts[0] ? parts[0].replace('JP: ', '') : '';
+                let chinese = parts[1] || '';
+                let source = '';
+
+                // Extract source if present
+                const sourceMatch = chinese.match(/\s\(Source: (.+?)\)$/);
+                if (sourceMatch) {
+                    source = sourceMatch[1];
+                    chinese = chinese.replace(sourceMatch[0], '');
+                }
+
+                return `
+                    <div class="example-item">
+                        <div class="japanese">${japanese}</div>
+                        <div class="chinese">${chinese}</div>
+                        ${source ? `<div class="source">(Source: ${source})</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+            return `
+                <h3>例句</h3>
+                ${examplesHtml}
+            `;
+        }
+
+        function displayGrammarPoints(data) {
+            grammarListDiv.innerHTML = ''; // Clear previous results
+            if (data.length === 0) {
+                grammarListDiv.innerHTML = '<div class="no-results">没有找到匹配的语法点。</div>';
+                return;
+            }
+
+            data.forEach(point => {
+                const grammarPointDiv = document.createElement('div');
+                grammarPointDiv.classList.add('grammar-point');
+
+                const headerDiv = document.createElement('div');
+                headerDiv.classList.add('grammar-point-header');
+                headerDiv.innerHTML = `
+                    <div>
+                        ${point.pattern}
+                        ${point.readings ? `<span class="readings">${point.readings}</span>` : ''}
+                    </div>
+                    <span class="toggle-icon">▶</span>
+                `;
+                grammarPointDiv.appendChild(headerDiv);
+
+                const detailsDiv = document.createElement('div');
+                detailsDiv.classList.add('grammar-details');
+                detailsDiv.innerHTML = `
+                    ${createListItem('接续', point.connection_rules)}
+                    ${createListItem('说明', point.explanation_notes)}
+                    ${createExampleItem(point.examples)}
+                    ${createListItem('注意', point.usage_notes)}
+                `;
+                grammarPointDiv.appendChild(detailsDiv);
+
+                // Add click listener to the header to toggle the 'expanded' class
+                headerDiv.addEventListener('click', () => {
+                    grammarPointDiv.classList.toggle('expanded');
+                });
+
+                grammarListDiv.appendChild(grammarPointDiv);
+            });
+        }
+
+        function filterGrammarPoints() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filteredData = grammarData.filter(point => {
+                // Check if the search term exists in any of the relevant fields
+                return (
+                    point.pattern.toLowerCase().includes(searchTerm) ||
+                    (point.readings && point.readings.toLowerCase().includes(searchTerm)) ||
+                    (point.connection_rules && point.connection_rules.toLowerCase().includes(searchTerm)) ||
+                    (point.explanation_notes && point.explanation_notes.toLowerCase().includes(searchTerm)) ||
+                    (point.examples && point.examples.toLowerCase().includes(searchTerm)) ||
+                    (point.usage_notes && point.usage_notes.toLowerCase().includes(searchTerm))
+                );
+            });
+            displayGrammarPoints(filteredData);
+        }
+
+        // --- 数据加载部分 ---
+        // 使用 fetch API 从外部 JSON 文件加载数据
+        fetch('grammar_data.json')
+            .then(response => {
+                // 检查HTTP响应是否成功
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                // 将响应体解析为JSON
+                return response.json();
+            })
+            .then(data => {
+                // 数据加载成功后，将其赋值给 grammarData 变量
+                grammarData = data;
+                // 显示初始的语法点列表
+                displayGrammarPoints(grammarData);
+                // 在数据加载完成后，再绑定搜索框的事件监听器
+                searchInput.addEventListener('input', filterGrammarPoints);
+            })
+            .catch(error => {
+                // 捕获加载过程中可能发生的错误
+                console.error('Error loading grammar data:', error);
+                grammarListDiv.innerHTML = '<div class="no-results" style="color: red;">加载语法数据失败，请检查文件路径或网络连接。</div>';
+            });
+        // --- 数据加载部分结束 ---
+    </script>
+</body>
+</html>
