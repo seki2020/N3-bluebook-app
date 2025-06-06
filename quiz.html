@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日语语法练习习题</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans CJK JP', 'Noto Sans CJK SC', sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #searchInput { /* This will be removed or repurposed */
+            width: 80%;
+            max-width: 600px;
+            padding: 12px 15px;
+            margin: 0 auto 30px auto;
+            display: block;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            font-size: 1.1em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        #searchInput:focus {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+        }
+
+        #grammarList { /* This will be repurposed for quiz questions */
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .grammar-point { /* This will be repurposed for quiz questions */
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .grammar-point-header { /* This will be repurposed for quiz questions */
+            padding: 15px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e9f5ff;
+            border-bottom: 1px solid #d0e8ff;
+            color: #0056b3;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .grammar-point-header:hover {
+            background-color: #dbeaff;
+        }
+
+        .grammar-point-header .readings {
+            font-size: 0.7em;
+            color: #4da6ff;
+            margin-left: 10px;
+            font-weight: normal;
+        }
+
+        .toggle-icon {
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+            color: #007bff;
+        }
+
+        .grammar-point.expanded .toggle-icon {
+            transform: rotate(90deg);
+        }
+
+        .grammar-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.7s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 0;
+            padding: 0 25px;
+            background-color: #ffffff;
+            border-top: none;
+        }
+
+        .grammar-point.expanded .grammar-details {
+            max-height: 2000px;
+            opacity: 1;
+            padding-bottom: 20px;
+        }
+
+        .grammar-details h3 {
+            color: #495057;
+            font-size: 1.1em;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .grammar-details ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .grammar-details li {
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+        }
+
+        .grammar-details .example-item {
+            border-left: 3px solid #ced4da;
+            padding-left: 10px;
+            margin-bottom: 10px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .grammar-details .example-item .japanese {
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        .grammar-details .example-item .chinese {
+            font-style: italic;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .grammar-details .source {
+            font-size: 0.9em;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .no-results {
+            text-align: center;
+            font-size: 1.2em;
+            color: #888;
+            padding: 50px;
+        }
+
+        /* New styles for quiz */
+        .quiz-question {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+
+        .quiz-question p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .quiz-options label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .quiz-options label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .quiz-options input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .quiz-navigation {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .quiz-navigation button {
+            padding: 10px 20px;
+            font-size: 1.1em;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .quiz-navigation button:hover {
+            background-color: #0056b3;
+        }
+
+        .quiz-navigation button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .quiz-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .quiz-result.correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .quiz-result.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>日语语法练习习题</h1>
+
+
+    <div id="quizContainer" style="max-width: 900px; margin: 0 auto; display: none;">
+        <div id="questionDisplay">
+            <!-- Questions will be dynamically loaded here -->
+        </div>
+        <div class="quiz-navigation">
+            <button id="prevQuestion" disabled>上一题</button>
+            <button id="nextQuestion">下一题</button>
+            <button id="submitAnswer">提交答案</button>
+            <button id="showAnswer" style="background-color: #ffc107; color: #333;">显示答案</button>
+        </div>
+        <div id="quizResult" class="quiz-result" style="display: none;"></div>
+    </div>
+
+    <div id="noQuizData" class="no-results">正在加载习题数据...</div>
+
+    <script>
+        let quizData = [];
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // Store user's selected answers
+
+        const quizContainer = document.getElementById('quizContainer');
+        const questionDisplay = document.getElementById('questionDisplay');
+        const prevQuestionButton = document.getElementById('prevQuestion');
+        const nextQuestionButton = document.getElementById('nextQuestion');
+        const submitAnswerButton = document.getElementById('submitAnswer');
+        const showAnswerButton = document.getElementById('showAnswer');
+        const quizResultDiv = document.getElementById('quizResult');
+        const noQuizDataDiv = document.getElementById('noQuizData');
+
+        async function loadQuizData() {
+            try {
+                const response = await fetch('questions/ch01.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                quizData = await response.json();
+                if (quizData.length > 0) {
+                    currentQuestionIndex = 0;
+                    userAnswers = {}; // Reset answers for new quiz
+                    quizContainer.style.display = 'block';
+                    noQuizDataDiv.style.display = 'none';
+                    displayQuestion();
+                } else {
+                    quizContainer.style.display = 'none';
+                    noQuizDataDiv.style.display = 'block';
+                    noQuizDataDiv.textContent = '当前章节没有找到习题数据。';
+                }
+            } catch (error) {
+                console.error('Error loading quiz data:', error);
+                quizContainer.style.display = 'none';
+                noQuizDataDiv.style.display = 'block';
+                noQuizDataDiv.textContent = '加载习题数据失败，请检查文件路径和内容。';
+            }
+        }
+
+        function displayQuestion() {
+            quizResultDiv.style.display = 'none'; // Hide previous result
+            quizResultDiv.classList.remove('correct', 'incorrect'); // Clear result classes
+            showAnswerButton.textContent = '显示答案'; // Reset show answer button text
+
+            if (quizData.length === 0) {
+                questionDisplay.innerHTML = '<div class="no-results">没有习题可显示。</div>';
+                updateNavigationButtons();
+                return;
+            }
+
+            const question = quizData[currentQuestionIndex];
+            let optionsHtml = Object.keys(question.options).map(key => `
+                <label>
+                    <input type="radio" name="quizOption" value="${key}" ${userAnswers[currentQuestionIndex] === key ? 'checked' : ''}>
+                    ${key}: ${question.options[key]}
+                </label>
+            `).join('');
+
+            questionDisplay.innerHTML = `
+                <div class="quiz-question">
+                    <p><strong>${currentQuestionIndex + 1}.</strong> ${question.question}</p>
+                    <div class="quiz-options">
+                        ${optionsHtml}
+                    </div>
+                </div>
+            `;
+
+            // Add event listeners for radio buttons to store user's answer
+            document.querySelectorAll('input[name="quizOption"]').forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    userAnswers[currentQuestionIndex] = event.target.value;
+                });
+            });
+
+            updateNavigationButtons();
+        }
+
+        function updateNavigationButtons() {
+            prevQuestionButton.disabled = currentQuestionIndex === 0;
+            nextQuestionButton.disabled = currentQuestionIndex === quizData.length - 1;
+            submitAnswerButton.style.display = 'inline-block'; // Always show submit button
+            showAnswerButton.style.display = 'inline-block'; // Always show show answer button
+        }
+
+        function goToNextQuestion() {
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                displayQuestion();
+            }
+        }
+
+        function goToPrevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                displayQuestion();
+            }
+        }
+
+        function submitAnswer() {
+            const selectedOptionKey = userAnswers[currentQuestionIndex];
+            if (selectedOptionKey === undefined) {
+                quizResultDiv.style.display = 'block';
+                quizResultDiv.classList.add('incorrect');
+                quizResultDiv.textContent = '请选择一个答案。';
+                return;
+            }
+
+            const question = quizData[currentQuestionIndex];
+            if (selectedOptionKey === question.answer) {
+                quizResultDiv.style.display = 'block';
+                quizResultDiv.classList.add('correct');
+                quizResultDiv.textContent = '回答正确！';
+            } else {
+                quizResultDiv.style.display = 'block';
+                quizResultDiv.classList.add('incorrect');
+                quizResultDiv.textContent = `回答错误。正确答案是: ${question.answer}: ${question.options[question.answer]}。解释: ${question.explanation}`;
+            }
+        }
+
+        function toggleAnswer() {
+            const question = quizData[currentQuestionIndex];
+            if (!question) return;
+
+            if (showAnswerButton.textContent === '显示答案') {
+                quizResultDiv.style.display = 'block';
+                quizResultDiv.classList.remove('correct', 'incorrect');
+                quizResultDiv.textContent = `正确答案是: ${question.answer}: ${question.options[question.answer]}。解释: ${question.explanation}`;
+                showAnswerButton.textContent = '隐藏答案';
+            } else {
+                quizResultDiv.style.display = 'none';
+                showAnswerButton.textContent = '显示答案';
+            }
+        }
+
+        // Event Listeners
+        prevQuestionButton.addEventListener('click', goToPrevQuestion);
+        nextQuestionButton.addEventListener('click', goToNextQuestion);
+        submitAnswerButton.addEventListener('click', submitAnswer);
+        showAnswerButton.addEventListener('click', toggleAnswer);
+
+        // Initial load
+        loadQuizData();
+    </script>
+</body>
+</html>
