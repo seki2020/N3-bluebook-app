@@ -273,7 +273,7 @@
 
         async function loadQuizData() {
             try {
-                const response = await fetch('questions/ch01.json');
+                const response = await fetch('ch01.json');
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }

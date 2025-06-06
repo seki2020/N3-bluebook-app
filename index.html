@@ -168,6 +168,7 @@
         <select id="chapterFilter" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc; font-size: 1em; outline: none;">
             <option value="all">所有章节</option>
         </select>
+        <button id="tryQuizButton" style="padding: 8px 15px; margin-left: 15px; border-radius: 5px; border: none; background-color: #007bff; color: white; font-size: 1em; cursor: pointer;">Try</button>
     </div>
 
     <div id="totalCount" style="text-align: center; margin-bottom: 20px; font-size: 1.1em; color: #555;">
@@ -328,6 +329,14 @@
                 grammarListDiv.innerHTML = '<div class="no-results" style="color: red;">加载语法数据失败，请确保后端服务已运行且可访问 (http://localhost:8000/grammar_rules)。</div>';
             });
         // --- 数据加载部分结束 ---
+
+        // Add event listener for the new "Try" button
+        const tryQuizButton = document.getElementById('tryQuizButton');
+        if (tryQuizButton) {
+            tryQuizButton.addEventListener('click', () => {
+                window.open('/questions/ch01.html', '_blank');
+            });
+        }
     </script>
 </body>
 </html>

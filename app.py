@@ -5,6 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from typing import Optional
 import sqlite3
 import json
+import os
 
 app = FastAPI()
 
@@ -21,6 +22,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/questions", StaticFiles(directory="questions"), name="questions")
 
 DATABASE_NAME = 'grammar.db'
 
@@ -89,6 +92,27 @@ async def get_grammar_rules_by_chapter(chapter: int):
     finally:
         if conn:
             conn.close()
+
+@app.get("/chapters")
+async def get_available_chapters():
+    """
+    Lists available chapter numbers by scanning the 'questions/' directory.
+    """
+    chapters = []
+    try:
+        for filename in os.listdir("questions"):
+            if filename.startswith("ch") and filename.endswith(".json"):
+                try:
+                    chapter_num = int(filename[2:-5]) # Extract number from 'chXX.json'
+                    chapters.append(chapter_num)
+                except ValueError:
+                    continue # Skip files that don't match the pattern
+        chapters.sort()
+        return chapters
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Questions directory not found.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred while listing chapters: {e}")
 
 if __name__ == "__main__":
     import uvicorn
