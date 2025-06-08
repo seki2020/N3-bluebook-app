@@ -236,10 +236,39 @@
             background-color: #f8d7da;
             color: #721c24;
         }
+
+        /* Styles for progress bar */
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress {
+            height: 100%;
+            width: 0%;
+            background-color: #4CAF50; /* Green */
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            line-height: 20px; /* Center the text vertically */
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #555;
+        }
     </style>
 </head>
 <body>
-    <h1>语法练习习题</h1>
+    <h1>语法练习题</h1>
+    
 
 
     <div id="quizContainer" style="max-width: 900px; margin: 0 auto; display: none;">
@@ -249,10 +278,15 @@
         <div class="quiz-navigation">
             <button id="prevQuestion" disabled>上一题</button>
             <button id="nextQuestion">下一题</button>
-            <!-- <button id="submitAnswer">提交答案</button>
-            <button id="showAnswer" style="background-color: #ffc107; color: #333;">显示答案</button> -->
         </div>
         <div id="quizResult" class="quiz-result" style="display: none;"></div>
+    </div>
+
+    <div id="quizProgressBarContainer" style="max-width: 900px; margin: 20px auto; display: none;">
+        <div id="quizProgressBar" class="progress-bar">
+            <div id="quizProgress" class="progress"></div>
+        </div>
+        <div id="quizProgressText" class="progress-text"></div>
     </div>
 
     <div id="noQuizData" class="no-results">正在加载习题数据...</div>
@@ -266,10 +300,11 @@
         const questionDisplay = document.getElementById('questionDisplay');
         const prevQuestionButton = document.getElementById('prevQuestion');
         const nextQuestionButton = document.getElementById('nextQuestion');
-        const submitAnswerButton = document.getElementById('submitAnswer');
-        const showAnswerButton = document.getElementById('showAnswer');
         const quizResultDiv = document.getElementById('quizResult');
         const noQuizDataDiv = document.getElementById('noQuizData');
+        const quizProgressBarContainer = document.getElementById('quizProgressBarContainer');
+        const quizProgress = document.getElementById('quizProgress');
+        const quizProgressText = document.getElementById('quizProgressText');
 
         async function loadQuizData() {
             try {
@@ -282,6 +317,7 @@
                     userAnswers = {}; // Reset answers for new quiz
                     quizContainer.style.display = 'block';
                     noQuizDataDiv.style.display = 'none';
+                    quizProgressBarContainer.style.display = 'block'; // Show progress bar
                     displayQuestion();
                 } else if (quizData && quizData.quiz && Array.isArray(quizData.quiz) && quizData.quiz.length > 0) {
                     quizData = quizData.quiz; // Access the 'quiz' array if the root is an object
@@ -289,29 +325,32 @@
                     userAnswers = {}; // Reset answers for new quiz
                     quizContainer.style.display = 'block';
                     noQuizDataDiv.style.display = 'none';
+                    quizProgressBarContainer.style.display = 'block'; // Show progress bar
                     displayQuestion();
                 }
                 else {
                     quizContainer.style.display = 'none';
                     noQuizDataDiv.style.display = 'block';
                     noQuizDataDiv.textContent = '当前章节没有找到习题数据。';
+                    quizProgressBarContainer.style.display = 'none'; // Hide progress bar
                 }
             } catch (error) {
                 console.error('Error loading quiz data:', error);
                 quizContainer.style.display = 'none';
                 noQuizDataDiv.style.display = 'block';
                 noQuizDataDiv.textContent = '加载习题数据失败，请检查文件路径和内容。';
+                quizProgressBarContainer.style.display = 'none'; // Hide progress bar
             }
         }
 
         function displayQuestion() {
             quizResultDiv.style.display = 'none'; // Hide previous result
             quizResultDiv.classList.remove('correct', 'incorrect'); // Clear result classes
-            showAnswerButton.textContent = '显示答案'; // Reset show answer button text
 
             if (quizData.length === 0) {
                 questionDisplay.innerHTML = '<div class="no-results">没有习题可显示。</div>';
                 updateNavigationButtons();
+                updateProgressBar(); // Update progress bar even if no questions
                 return;
             }
 
@@ -332,21 +371,32 @@
                 </div>
             `;
 
-            // Add event listeners for radio buttons to store user's answer
+            // Add event listeners for radio buttons to store user's answer and check answer
             document.querySelectorAll('input[name="quizOption"]').forEach(radio => {
                 radio.addEventListener('change', (event) => {
                     userAnswers[currentQuestionIndex] = event.target.value;
+                    checkAnswer(event.target.value); // Call checkAnswer immediately
                 });
             });
 
             updateNavigationButtons();
+            updateProgressBar();
         }
 
         function updateNavigationButtons() {
             prevQuestionButton.disabled = currentQuestionIndex === 0;
             nextQuestionButton.disabled = currentQuestionIndex === quizData.length - 1;
-            submitAnswerButton.style.display = 'inline-block'; // Always show submit button
-            showAnswerButton.style.display = 'inline-block'; // Always show show answer button
+        }
+
+        function updateProgressBar() {
+            if (quizData.length === 0) {
+                quizProgress.style.width = '0%';
+                quizProgressText.textContent = '0/0';
+                return;
+            }
+            const progress = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            quizProgress.style.width = `${progress}%`;
+            quizProgressText.textContent = `${currentQuestionIndex + 1}/${quizData.length}`;
         }
 
         function goToNextQuestion() {
@@ -363,20 +413,22 @@
             }
         }
 
-        function submitAnswer() {
-            const selectedOptionKey = userAnswers[currentQuestionIndex];
-            if (selectedOptionKey === undefined) {
-                quizResultDiv.style.display = 'block';
-                quizResultDiv.classList.add('incorrect');
-                quizResultDiv.textContent = '请选择一个答案。';
-                return;
-            }
-
+        function checkAnswer(selectedOptionKey) {
             const question = quizData[currentQuestionIndex];
+            if (!question) return;
+
+            // Disable all radio buttons after an answer is selected
+            document.querySelectorAll('input[name="quizOption"]').forEach(radio => {
+                radio.disabled = true;
+            });
+
             if (selectedOptionKey === question.answer) {
                 quizResultDiv.style.display = 'block';
                 quizResultDiv.classList.add('correct');
                 quizResultDiv.textContent = '回答正确！';
+                setTimeout(() => {
+                    goToNextQuestion();
+                }, 1000); // Automatically go to next question after 1 second
             } else {
                 quizResultDiv.style.display = 'block';
                 quizResultDiv.classList.add('incorrect');
@@ -384,26 +436,9 @@
             }
         }
 
-        function toggleAnswer() {
-            const question = quizData[currentQuestionIndex];
-            if (!question) return;
-
-            if (showAnswerButton.textContent === '显示答案') {
-                quizResultDiv.style.display = 'block';
-                quizResultDiv.classList.remove('correct', 'incorrect');
-                quizResultDiv.textContent = `正确答案是: ${question.answer}: ${question.options[question.answer]}。解释: ${question.explanation}`;
-                showAnswerButton.textContent = '隐藏答案';
-            } else {
-                quizResultDiv.style.display = 'none';
-                showAnswerButton.textContent = '显示答案';
-            }
-        }
-
         // Event Listeners
         prevQuestionButton.addEventListener('click', goToPrevQuestion);
         nextQuestionButton.addEventListener('click', goToNextQuestion);
-        submitAnswerButton.addEventListener('click', submitAnswer);
-        showAnswerButton.addEventListener('click', toggleAnswer);
 
         // Initial load
         loadQuizData();
