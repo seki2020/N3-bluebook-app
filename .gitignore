@@ -1,6 +1,3 @@
 .vscode
-raw json/*
-grammar.db
 __pycache__
 .venv
-data/*

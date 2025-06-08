@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日语语法练习习题</title>
+    <title>日语语法练习习题 {{chNo}} </title>
     <style>
         body {
             font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans CJK JP', 'Noto Sans CJK SC', sans-serif;
@@ -273,18 +273,25 @@
 
         async function loadQuizData() {
             try {
-                const response = await fetch('ch01.json');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                quizData = await response.json();
-                if (quizData.length > 0) {
+                const rawQuizData = '{{quiz_data | safe}}';
+                const temp_quizData = JSON.parse(rawQuizData); // Parse the JSON string
+
+                quizData = temp_quizData.quiz
+                if (Array.isArray(quizData) && quizData.length > 0) {
                     currentQuestionIndex = 0;
                     userAnswers = {}; // Reset answers for new quiz
                     quizContainer.style.display = 'block';
                     noQuizDataDiv.style.display = 'none';
                     displayQuestion();
-                } else {
+                } else if (quizData && quizData.quiz && Array.isArray(quizData.quiz) && quizData.quiz.length > 0) {
+                    quizData = quizData.quiz; // Access the 'quiz' array if the root is an object
+                    currentQuestionIndex = 0;
+                    userAnswers = {}; // Reset answers for new quiz
+                    quizContainer.style.display = 'block';
+                    noQuizDataDiv.style.display = 'none';
+                    displayQuestion();
+                }
+                else {
                     quizContainer.style.display = 'none';
                     noQuizDataDiv.style.display = 'block';
                     noQuizDataDiv.textContent = '当前章节没有找到习题数据。';

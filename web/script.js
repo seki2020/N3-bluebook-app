@@ -151,6 +151,14 @@ fetch('http://localhost:8000/data/grammars.json')
 const tryQuizButton = document.getElementById('tryQuizButton');
 if (tryQuizButton) {
     tryQuizButton.addEventListener('click', () => {
-        window.open('/questions/ch01.html', '_blank');
+        const selectedChapter = chapterFilter.value;
+        if (selectedChapter === 'all') {
+            alert('请选择一个具体的章节进行测验。');
+            return;
+        }
+        // Construct the URL for the quiz based on the selected chapter
+        // The backend route is /quiz/{chNo}, so we can directly use the chapter number
+        const quizUrl = `/quiz/${selectedChapter}`;
+        window.open(quizUrl, '_blank');
     });
 }

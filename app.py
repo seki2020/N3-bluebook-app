@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -6,9 +6,11 @@ from typing import Optional
 import sqlite3
 import json
 import os
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
 
+web_templates = Jinja2Templates("web/templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
@@ -16,6 +18,21 @@ async def read_root():
         html_content = f.read()
     return HTMLResponse(content=html_content)
 
+@app.get("/quiz/{chNo}", response_class=HTMLResponse)
+async def read_quiz(request: Request, chNo: int):
+    try:
+        with open(f"data/quiz/ch{chNo:02d}.json", "r", encoding="utf-8") as f:
+            quiz_data = json.load(f)
+        print(quiz_data)
+        json_data_str = json.dumps(quiz_data, ensure_ascii=False)
+
+        return web_templates.TemplateResponse(
+            request=request, name="quiz.html", context={"chNo": f"{chNo:02d}", "quiz_data": json_data_str}
+        )
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Quiz data not found.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
 # Allow CORS for frontend development
 app.add_middleware(
@@ -28,77 +45,6 @@ app.add_middleware(
 
 app.mount("/data", StaticFiles(directory="data"), name="data")
 app.mount("/web", StaticFiles(directory="web"), name="static")
-
-DATABASE_NAME = "grammar.db"
-
-
-def get_db_connection():
-    """Establishes a connection to the SQLite database."""
-    conn = sqlite3.connect(DATABASE_NAME)
-    conn.row_factory = sqlite3.Row  # This allows accessing columns by name
-    return conn
-
-
-@app.get("/grammar_rules")
-async def get_all_grammar_rules():
-    """Fetches all grammar rules from the database."""
-    conn = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM grammar_rules")
-        rules = cursor.fetchall()
-
-        # Convert rows to a list of dictionaries, handling JSON fields
-        result = []
-        for row in rules:
-            rule_dict = dict(row)
-            # Deserialize JSON strings back to Python objects
-            for key in ["sub_patterns", "notes", "meaning_notes"]:
-                if rule_dict.get(key):
-                    try:
-                        rule_dict[key] = json.loads(rule_dict[key])
-                    except json.JSONDecodeError:
-                        rule_dict[key] = None  # Handle potential decoding errors
-            result.append(rule_dict)
-        return result
-    except sqlite3.Error as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {e}")
-    finally:
-        if conn:
-            conn.close()
-
-
-@app.get("/grammar_rules/chapter/{chapter}")
-async def get_grammar_rules_by_chapter(chapter: int):
-    """Fetches grammar rules for a specific chapter from the database."""
-    conn = None
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        query = "SELECT * FROM grammar_rules WHERE chapter = ?"
-        cursor.execute(query, (chapter,))
-        rules = cursor.fetchall()
-
-        # Convert rows to a list of dictionaries, handling JSON fields
-        result = []
-        for row in rules:
-            rule_dict = dict(row)
-            # Deserialize JSON strings back to Python objects
-            for key in ["sub_patterns", "notes", "meaning_notes"]:
-                if rule_dict.get(key):
-                    try:
-                        rule_dict[key] = json.loads(rule_dict[key])
-                    except json.JSONDecodeError:
-                        rule_dict[key] = None  # Handle potential decoding errors
-            result.append(rule_dict)
-        return result
-    except sqlite3.Error as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {e}")
-    finally:
-        if conn:
-            conn.close()
 
 
 @app.get("/chapters")
@@ -124,7 +70,6 @@ async def get_available_chapters():
             status_code=500,
             detail=f"An unexpected error occurred while listing chapters: {e}",
         )
-
 
 if __name__ == "__main__":
     import uvicorn
