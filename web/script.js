@@ -112,7 +112,7 @@ function filterGrammarPoints() {
 
 // --- 数据加载部分 ---
 // 使用 fetch API 从 FastAPI 后端服务加载数据
-fetch('http://localhost:8000/data/grammars.json')
+fetch('/data/grammars.json')
     .then(response => {
         // 检查HTTP响应是否成功
         if (!response.ok) {

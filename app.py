@@ -48,7 +48,6 @@ async def read_quiz(request: Request, chNo: int):
     try:
         with open(f"data/quiz/ch{chNo:02d}.json", "r", encoding="utf-8") as f:
             quiz_data = json.load(f)
-        print(quiz_data)
         json_data_str = json.dumps(quiz_data, ensure_ascii=False)
 
         return web_templates.TemplateResponse(
@@ -99,4 +98,4 @@ async def get_available_chapters():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=5000)
