@@ -135,9 +135,21 @@ fetch('/data/grammars.json')
 
         // 显示初始的语法点列表
         displayGrammarPoints(grammarData);
+        // Load saved chapter from localStorage
+        const savedChapter = localStorage.getItem('selectedChapter');
+        if (savedChapter) {
+            chapterFilter.value = savedChapter;
+        }
+
+        // 显示初始的语法点列表 (filtered by saved chapter if any)
+        filterGrammarPoints(); // Call filterGrammarPoints to apply the saved chapter filter
+
         // 在数据加载完成后，再绑定搜索框和章节筛选器的事件监听器
         searchInput.addEventListener('input', filterGrammarPoints);
-        chapterFilter.addEventListener('change', filterGrammarPoints);
+        chapterFilter.addEventListener('change', () => {
+            filterGrammarPoints();
+            localStorage.setItem('selectedChapter', chapterFilter.value); // Save selected chapter to localStorage
+        });
     })
     .catch(error => {
         // 捕获加载过程中可能发生的错误
@@ -159,5 +171,34 @@ if (tryQuizButton) {
         // The backend route is /quiz/{chNo}, so we can directly use the chapter number
         const quizUrl = `/quiz/${selectedChapter}`;
         window.open(quizUrl, '_blank');
+    });
+}
+
+// Add event listener for the new "Print Cards" button
+const printCardsButton = document.getElementById('printCardsButton');
+if (printCardsButton) {
+    printCardsButton.addEventListener('click', () => {
+        const grammarPoints = document.querySelectorAll('.grammar-point');
+        const initiallyCollapsed = [];
+
+        // Expand all grammar points for printing
+        grammarPoints.forEach(point => {
+            if (!point.classList.contains('expanded')) {
+                point.classList.add('expanded');
+                initiallyCollapsed.push(point); // Store points that were initially collapsed
+            }
+        });
+
+        // Trigger print dialog
+        window.print();
+
+        // Use a small delay to ensure the print dialog has closed,
+        // then restore the state of initially collapsed grammar points.
+        // This handles both print and cancel scenarios.
+        setTimeout(() => {
+            initiallyCollapsed.forEach(point => {
+                point.classList.remove('expanded');
+            });
+        }, 100); // A small delay (e.g., 100ms)
     });
 }
