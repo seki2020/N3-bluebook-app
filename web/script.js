@@ -62,7 +62,6 @@ function displayGrammarPoints(data) {
             <div>
                 ${point.pattern}
                 ${point.readings ? `<span class="readings">${point.readings}</span>` : ''}
-                ${point.chapter ? `<span class="chapter-info" style="font-size: 0.6em; color: #0056b3; margin-left: 15px; padding: 3px 8px; background-color: #cce5ff; border-radius: 5px;">章节: ${point.chapter}</span>` : ''}
             </div>
             <span class="toggle-icon">▶</span>
         `;
