@@ -1,0 +1,152 @@
+body {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans CJK JP', 'Noto Sans CJK SC', sans-serif;
+    margin: 20px;
+    padding: 0;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#searchInput {
+    width: 80%;
+    max-width: 600px;
+    padding: 12px 15px;
+    margin: 0 auto 30px auto;
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 1.1em;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+#searchInput:focus {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+}
+
+#grammarList {
+    max-width: 900px; /* Adjust max-width for better readability on wide screens */
+    margin: 0 auto;
+}
+
+.grammar-point {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    overflow: hidden; /* Ensures content doesn't spill during collapse */
+}
+
+.grammar-point-header {
+    padding: 15px 25px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e9f5ff; /* Light blue background for header */
+    border-bottom: 1px solid #d0e8ff;
+    color: #0056b3; /* Darker blue text */
+    font-size: 1.3em;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.grammar-point-header:hover {
+    background-color: #dbeaff;
+}
+
+.grammar-point-header .readings {
+    font-size: 0.7em;
+    color: #4da6ff;
+    margin-left: 10px;
+    font-weight: normal;
+}
+
+.toggle-icon {
+    font-size: 1.5em;
+    transition: transform 0.3s ease;
+    color: #007bff;
+}
+
+.grammar-point.expanded .toggle-icon {
+    transform: rotate(90deg); /* Rotate icon when expanded */
+}
+
+.grammar-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.7s ease-in-out, opacity 0.5s ease-in-out;
+    opacity: 0;
+    padding: 0 25px; /* Padding will animate with max-height */
+    background-color: #ffffff;
+    border-top: none;
+}
+
+.grammar-point.expanded .grammar-details {
+    max-height: 2000px; /* Large enough value to show all content */
+    opacity: 1;
+    padding-bottom: 20px; /* Add bottom padding when expanded */
+}
+
+.grammar-details h3 {
+    color: #495057;
+    font-size: 1.1em;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.grammar-details ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.grammar-details li {
+    margin-bottom: 5px;
+    white-space: pre-wrap; /* Preserves line breaks in text */
+}
+
+.grammar-details .example-item {
+    border-left: 3px solid #ced4da;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.grammar-details .example-item .japanese {
+    font-weight: bold;
+    color: #34495e;
+}
+
+.grammar-details .example-item .chinese {
+    font-style: italic;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.grammar-details .source {
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 5px;
+}
+
+.no-results {
+    text-align: center;
+    font-size: 1.2em;
+    color: #888;
+    padding: 50px;
+}
