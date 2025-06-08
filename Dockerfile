@@ -15,4 +15,4 @@ EXPOSE 5000
 
 # Run app.py when the container launches
 # Use uvicorn to run the FastAPI application
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8005"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "5000"]
