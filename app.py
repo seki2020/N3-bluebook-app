@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -6,17 +6,42 @@ from typing import Optional
 import sqlite3
 import json
 import os
+import csv
+from datetime import datetime
 from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
 
 web_templates = Jinja2Templates("web/templates")
 
+CONTACT_CSV_FILE = "data/contact_submissions.csv"
+
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
-    with open("web/index.html", "r", encoding="utf-8") as f:
+    with open("index.html", "r", encoding="utf-8") as f:
         html_content = f.read()
     return HTMLResponse(content=html_content)
+
+@app.post("/submit-contact")
+async def submit_contact(email: str = Body(...), wechat: Optional[str] = Body(None)):
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data = [timestamp, email, wechat]
+
+    # Ensure the data directory exists
+    os.makedirs(os.path.dirname(CONTACT_CSV_FILE), exist_ok=True)
+
+    try:
+        with open(CONTACT_CSV_FILE, 'a', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            # Write header if file is empty
+            if csvfile.tell() == 0:
+                writer.writerow(["Timestamp", "Email", "WeChat"])
+            writer.writerow(data)
+        print(f"Saved contact submission to {CONTACT_CSV_FILE}: {data}")
+        return {"message": "Contact information received successfully!"}
+    except Exception as e:
+        print(f"Error saving contact submission: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save contact information: {e}")
 
 @app.get("/quiz/{chNo}", response_class=HTMLResponse)
 async def read_quiz(request: Request, chNo: int):

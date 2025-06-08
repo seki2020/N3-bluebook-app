@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JLPT Bluebook App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .jlpt-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+        .jlpt-button-group {
+            text-align: center;
+        }
+        .jlpt-button {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #007bff;
+            color: white;
+            transition: background-color 0.3s ease;
+            width: 150px; /* Fixed width for buttons */
+        }
+        .jlpt-button:hover:not(:disabled) {
+            background-color: #0056b3;
+        }
+        .jlpt-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .coming-soon {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .hero-section {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 80%;
+            max-width: 600px;
+        }
+        .hero-section h2 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+        .hero-section p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        .contact-form input[type="text"],
+        .contact-form input[type="email"] {
+            width: 80%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .contact-form button {
+            padding: 12px 25px;
+            font-size: 1em;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .contact-form button:hover {
+            background-color: #218838;
+        }
+        #form-message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>JLPT Bluebook App</h1>
+
+    <div class="jlpt-buttons">
+        <div class="jlpt-button-group">
+            <button class="jlpt-button" id="n1-button" disabled>JLPT N1</button>
+            <div class="coming-soon">即将开放，尽情期待</div>
+        </div>
+        <div class="jlpt-button-group">
+            <button class="jlpt-button" id="n2-button" disabled>JLPT N2</button>
+            <div class="coming-soon">即将开放，尽情期待</div>
+        </div>
+        <div class="jlpt-button-group">
+            <button class="jlpt-button" id="n3-button">JLPT N3</button>
+        </div>
+        <div class="jlpt-button-group">
+            <button class="jlpt-button" id="n4-button" disabled>JLPT N4</button>
+            <div class="coming-soon">即将开放，尽情期待</div>
+        </div>
+        <div class="jlpt-button-group">
+            <button class="jlpt-button" id="n5-button" disabled>JLPT N5</button>
+            <div class="coming-soon">即将开放，尽情期待</div>
+        </div>
+    </div>
+
+    <div class="hero-section">
+        <h2>获取最新更新和独家内容！</h2>
+        <p>留下您的邮箱或微信号，我们将第一时间通知您新功能上线和学习资料更新。</p>
+        <form class="contact-form" id="contact-form">
+            <input type="email" id="email" name="email" placeholder="您的邮箱" required>
+            <input type="text" id="wechat" name="wechat" placeholder="您的微信号 (可选)">
+            <button type="submit">发送</button>
+        </form>
+        <div id="form-message"></div>
+    </div>
+
+    <script>
+        document.getElementById('n3-button').addEventListener('click', function() {
+            window.location.href = 'web/n3.html';
+        });
+
+        document.getElementById('contact-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const wechat = document.getElementById('wechat').value;
+            const formMessage = document.getElementById('form-message');
+
+            try {
+                const response = await fetch('/submit-contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, wechat }),
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    formMessage.style.color = 'green';
+                    formMessage.textContent = '感谢您的提交！我们已收到您的信息。';
+                    document.getElementById('contact-form').reset();
+                } else {
+                    formMessage.style.color = 'red';
+                    formMessage.textContent = result.message || '提交失败，请重试。';
+                }
+            } catch (error) {
+                formMessage.style.color = 'red';
+                formMessage.textContent = '网络错误，请检查您的连接。';
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
