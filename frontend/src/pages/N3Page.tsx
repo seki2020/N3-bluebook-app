@@ -86,6 +86,17 @@ const N3Page: React.FC = () => {
     filterGrammarPoints();
   }, [grammarData, searchTerm, selectedChapter, filterGrammarPoints]);
 
+  // Scroll to anchor when filteredGrammar changes and hash is present
+  useEffect(() => {
+    if (filteredGrammar.length > 0 && window.location.hash) {
+      const id = decodeURIComponent(window.location.hash.substring(1));
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  }, [filteredGrammar]);
+
   const handleChapterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const chapter = event.target.value;
     setSelectedChapter(chapter);

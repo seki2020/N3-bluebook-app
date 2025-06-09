@@ -70,8 +70,10 @@ const GrammarPointCard: React.FC<GrammarPointCardProps> = ({ point }) => {
     }
   };
 
+  const encodedPattern = encodeURIComponent(point.pattern);
+
   return (
-    <div className="grammar-point">
+    <div className="grammar-point" id={encodedPattern}>
       <div className="grammar-point-header" onClick={toggleGrammarPoint}>
         <div>
           {point.pattern}
