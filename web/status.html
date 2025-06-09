@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        pre {
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .status-online {
+            color: green;
+            font-weight: bold;
+        }
+        .status-offline {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>API Status Check</h1>
+        <p>Fetching status from <a href="http://localhost:8005" target="_blank">http://localhost:8005/</a>...</p>
+        <div id="api-status">Loading...</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('http://localhost:8005')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const statusDiv = document.getElementById('api-status');
+                    if (data.status === 'online') {
+                        statusDiv.innerHTML = `Status: <span class="status-online">${data.status}</span>`;
+                    } else {
+                        statusDiv.innerHTML = `Status: <span class="status-offline">${data.status}</span>`;
+                    }
+                    const pre = document.createElement('pre');
+                    pre.textContent = JSON.stringify(data, null, 2);
+                    statusDiv.appendChild(pre);
+                })
+                .catch(error => {
+                    const statusDiv = document.getElementById('api-status');
+                    statusDiv.innerHTML = `Error: <span class="status-offline">${error.message}</span>`;
+                    console.error('Error fetching API status:', error);
+                });
+        });
+    </script>
+</body>
+</html>

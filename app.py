@@ -16,11 +16,20 @@ web_templates = Jinja2Templates("web/templates")
 
 CONTACT_CSV_FILE = "data/contact_submissions.csv"
 
-@app.get("/", response_class=HTMLResponse)
-async def read_root():
-    with open("index.html", "r", encoding="utf-8") as f:
-        html_content = f.read()
-    return HTMLResponse(content=html_content)
+# Allow CORS for frontend development
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["creatorlens.asia", "http://127.0.0.1:5501"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+async def read_status():
+    return {"status": "online"}
+
 
 @app.post("/submit-contact")
 async def submit_contact(email: str = Body(...), wechat: Optional[str] = Body(None)):
@@ -31,7 +40,7 @@ async def submit_contact(email: str = Body(...), wechat: Optional[str] = Body(No
     os.makedirs(os.path.dirname(CONTACT_CSV_FILE), exist_ok=True)
 
     try:
-        with open(CONTACT_CSV_FILE, 'a', newline='', encoding='utf-8') as csvfile:
+        with open(CONTACT_CSV_FILE, "a", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
             # Write header if file is empty
             if csvfile.tell() == 0:
@@ -41,7 +50,10 @@ async def submit_contact(email: str = Body(...), wechat: Optional[str] = Body(No
         return {"message": "Contact information received successfully!"}
     except Exception as e:
         print(f"Error saving contact submission: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to save contact information: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to save contact information: {e}"
+        )
+
 
 @app.get("/quiz/{chNo}", response_class=HTMLResponse)
 async def read_quiz(request: Request, chNo: int):
@@ -51,24 +63,18 @@ async def read_quiz(request: Request, chNo: int):
         json_data_str = json.dumps(quiz_data, ensure_ascii=False)
 
         return web_templates.TemplateResponse(
-            request=request, name="quiz.html", context={"chNo": f"{chNo:02d}", "quiz_data": json_data_str}
+            request=request,
+            name="quiz.html",
+            context={"chNo": f"{chNo:02d}", "quiz_data": json_data_str},
         )
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Quiz data not found.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
-# Allow CORS for frontend development
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins, adjust in production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-app.mount("/data", StaticFiles(directory="data"), name="data")
-app.mount("/web", StaticFiles(directory="web"), name="static")
+# app.mount("/data", StaticFiles(directory="data"), name="data")
+# app.mount("/web", StaticFiles(directory="web"), name="static")
 
 
 @app.get("/chapters")
@@ -94,6 +100,7 @@ async def get_available_chapters():
             status_code=500,
             detail=f"An unexpected error occurred while listing chapters: {e}",
         )
+
 
 if __name__ == "__main__":
     import uvicorn
