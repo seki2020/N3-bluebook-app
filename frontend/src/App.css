@@ -1,0 +1,361 @@
+/* Styles from original index.html */
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+.jlpt-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 40px;
+}
+.jlpt-button-group {
+    text-align: center;
+}
+.jlpt-button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s ease;
+    width: 150px; /* Fixed width for buttons */
+}
+.jlpt-button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+.jlpt-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+.coming-soon {
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 5px;
+}
+.hero-section {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 80%;
+    max-width: 600px;
+}
+.hero-section h2 {
+    color: #007bff;
+    margin-bottom: 20px;
+}
+.hero-section p {
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+}
+.contact-form input[type="text"],
+.contact-form input[type="email"] {
+    width: 80%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+}
+.contact-form button {
+    padding: 12px 25px;
+    font-size: 1em;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.contact-form button:hover {
+    background-color: #218838;
+}
+#form-message {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+/* Basic reset for React app */
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Styles from web/styles.css for N3 page */
+body {
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans CJK JP', 'Noto Sans CJK SC', sans-serif;
+    margin: 20px;
+    padding: 0;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+}
+
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#searchInput {
+    width: 80%;
+    max-width: 600px;
+    padding: 12px 15px;
+    margin: 0 auto 30px auto;
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 25px;
+    font-size: 1.1em;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+#searchInput:focus {
+    border-color: #007bff;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.2);
+}
+
+#grammarList {
+    max-width: 900px; /* Adjust max-width for better readability on wide screens */
+    margin: 0 auto;
+}
+
+.grammar-point {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    overflow: hidden; /* Ensures content doesn't spill during collapse */
+}
+
+.grammar-point-header {
+    padding: 15px 25px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #e9f5ff; /* Light blue background for header */
+    border-bottom: 1px solid #d0e8ff;
+    color: #0056b3; /* Darker blue text */
+    font-size: 1.3em;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.grammar-point-header:hover {
+    background-color: #dbeaff;
+}
+
+.grammar-point-header .readings {
+    font-size: 0.7em;
+    color: #4da6ff;
+    margin-left: 10px;
+    font-weight: normal;
+}
+
+.toggle-icon {
+    font-size: 1.5em;
+    transition: transform 0.3s ease;
+    color: #007bff;
+}
+
+.grammar-point.expanded .toggle-icon {
+    transform: rotate(90deg); /* Rotate icon when expanded */
+}
+
+.grammar-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.7s ease-in-out, opacity 0.5s ease-in-out;
+    opacity: 0;
+    padding: 0 25px; /* Padding will animate with max-height */
+    background-color: #ffffff;
+    border-top: none;
+}
+
+.grammar-point.expanded .grammar-details {
+    max-height: 2000px; /* Large enough value to show all content */
+    opacity: 1;
+    padding-bottom: 20px; /* Add bottom padding when expanded */
+}
+
+.grammar-details h3 {
+    color: #495057;
+    font-size: 1.1em;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+.grammar-details ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.grammar-details li {
+    margin-bottom: 5px;
+    white-space: pre-wrap; /* Preserves line breaks in text */
+}
+
+.grammar-details .example-item {
+    border-left: 3px solid #ced4da;
+    padding-left: 10px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.grammar-details .example-item .japanese {
+    font-weight: bold;
+    color: #34495e;
+}
+
+.grammar-details .example-item .chinese {
+    font-style: italic;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.grammar-details .source {
+    font-size: 0.9em;
+    color: #999;
+    margin-top: 5px;
+}
+
+.no-results {
+    text-align: center;
+    font-size: 1.2em;
+    color: #888;
+    padding: 50px;
+}
+
+/* New styles for quiz from web/templates/quiz.html */
+.quiz-question {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 20px;
+}
+
+.quiz-question p {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.quiz-options label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.quiz-options label:hover {
+    background-color: #f0f0f0;
+}
+
+.quiz-options input[type="radio"] {
+    margin-right: 10px;
+}
+
+.quiz-navigation {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.quiz-navigation button {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.quiz-navigation button:hover {
+    background-color: #0056b3;
+}
+
+.quiz-navigation button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.quiz-result {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.quiz-result.correct {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.quiz-result.incorrect {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Styles for progress bar */
+.progress-bar {
+    width: 100%;
+    background-color: #e0e0e0;
+    border-radius: 10px;
+    height: 20px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress {
+    height: 100%;
+    width: 0%;
+    background-color: #4CAF50; /* Green */
+    border-radius: 10px;
+    text-align: center;
+    color: white;
+    line-height: 20px; /* Center the text vertically */
+    transition: width 0.5s ease-in-out;
+}
+
+.progress-text {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 0.9em;
+    color: #555;
+}

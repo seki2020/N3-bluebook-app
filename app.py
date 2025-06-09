@@ -1,25 +1,22 @@
 from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, HTTPException, Request, Body
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import sqlite3
 import json
 import os
 import csv
 from datetime import datetime
-from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
-
-web_templates = Jinja2Templates("web/templates")
 
 CONTACT_CSV_FILE = "data/contact_submissions.csv"
 
 # Allow CORS for frontend development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["creatorlens.asia", "http://127.0.0.1:5501"],
+    allow_origins=["creatorlens.asia", "http://127.0.0.1:9001", "http://localhost:9001"], # Added localhost:5173 for Vite dev server
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,51 +52,62 @@ async def submit_contact(email: str = Body(...), wechat: Optional[str] = Body(No
         )
 
 
-@app.get("/quiz/{chNo}", response_class=HTMLResponse)
-async def read_quiz(request: Request, chNo: int):
+@app.get("/quiz")
+@app.get("/quiz/{chNo}")
+async def read_quiz(chNo: Optional[int] = None):
     try:
-        with open(f"data/quiz/ch{chNo:02d}.json", "r", encoding="utf-8") as f:
-            quiz_data = json.load(f)
-        json_data_str = json.dumps(quiz_data, ensure_ascii=False)
-
-        return web_templates.TemplateResponse(
-            request=request,
-            name="quiz.html",
-            context={"chNo": f"{chNo:02d}", "quiz_data": json_data_str},
-        )
+        if chNo is None:
+            all_quizzes = []
+            quiz_dir = "data/quiz"
+            if not os.path.exists(quiz_dir):
+                raise HTTPException(status_code=404, detail="Quiz data directory not found.")
+            for filename in os.listdir(quiz_dir):
+                if filename.endswith(".json"):
+                    try:
+                        with open(os.path.join(quiz_dir, filename), "r", encoding="utf-8") as f:
+                            quiz_data = json.load(f)
+                            all_quizzes.append(quiz_data)
+                    except Exception as e:
+                        print(f"Error loading quiz file {filename}: {e}")
+                        continue
+            return all_quizzes
+        else:
+            with open(f"data/quiz/{chNo}.json", "r", encoding="utf-8") as f:
+                quiz_data = json.load(f)
+            return quiz_data
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Quiz data not found.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
 
-# app.mount("/data", StaticFiles(directory="data"), name="data")
-# app.mount("/web", StaticFiles(directory="web"), name="static")
-
-
 @app.get("/chapters")
-async def get_available_chapters():
-    """
-    Lists available chapter numbers by scanning the 'questions/' directory.
-    """
-    chapters = []
+@app.get("/chapters/{chapterNo}")
+async def get_available_chapters(chapterNo: Optional[int] = None):
     try:
-        for filename in os.listdir("questions"):
-            if filename.startswith("ch") and filename.endswith(".json"):
-                try:
-                    chapter_num = int(filename[2:-5])  # Extract number from 'chXX.json'
-                    chapters.append(chapter_num)
-                except ValueError:
-                    continue  # Skip files that don't match the pattern
-        chapters.sort()
-        return chapters
+        if chapterNo is None:
+            all_chapters_data = []
+            grammers_dir = "data/grammers"
+            if not os.path.exists(grammers_dir):
+                raise HTTPException(status_code=404, detail="Grammar data directory not found.")
+            for filename in os.listdir(grammers_dir):
+                if filename.endswith(".json"):
+                    try:
+                        with open(os.path.join(grammers_dir, filename), "r", encoding="utf-8") as f:
+                            chapter_data = json.load(f)
+                            all_chapters_data.append(chapter_data)
+                    except Exception as e:
+                        print(f"Error loading chapter file {filename}: {e}")
+                        continue
+            return all_chapters_data
+        else:
+            with open(f"data/grammers/{chapterNo}.json", "r", encoding="utf-8") as f:
+                chapter_data = json.load(f)
+            return chapter_data
     except FileNotFoundError:
-        raise HTTPException(status_code=404, detail="Questions directory not found.")
+        raise HTTPException(status_code=404, detail="Chapter data not found.")
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"An unexpected error occurred while listing chapters: {e}",
-        )
+        raise HTTPException(status_code=500, detail=f"An error occurred: {e}")
 
 
 if __name__ == "__main__":
