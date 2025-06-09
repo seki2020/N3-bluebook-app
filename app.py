@@ -1,13 +1,14 @@
 from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException, Request, Body
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-import sqlite3
 import json
 import os
 import csv
 from datetime import datetime
+
+HOST = os.getenv("HOST", "0.0.0.0")  # 默认值
+PORT = int(os.getenv("PORT", 8005))  # 默认值
 
 app = FastAPI()
 
@@ -16,7 +17,11 @@ CONTACT_CSV_FILE = "data/contact_submissions.csv"
 # Allow CORS for frontend development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["creatorlens.asia", "http://127.0.0.1:9001", "http://localhost:9001"], # Added localhost:5173 for Vite dev server
+    allow_origins=[
+        "creatorlens.asia",
+        "http://127.0.0.1:9001",
+        "http://localhost:9001",
+    ],  # Added localhost:5173 for Vite dev server
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -60,11 +65,15 @@ async def read_quiz(chNo: Optional[int] = None):
             all_quizzes = []
             quiz_dir = "data/quiz"
             if not os.path.exists(quiz_dir):
-                raise HTTPException(status_code=404, detail="Quiz data directory not found.")
+                raise HTTPException(
+                    status_code=404, detail="Quiz data directory not found."
+                )
             for filename in os.listdir(quiz_dir):
                 if filename.endswith(".json"):
                     try:
-                        with open(os.path.join(quiz_dir, filename), "r", encoding="utf-8") as f:
+                        with open(
+                            os.path.join(quiz_dir, filename), "r", encoding="utf-8"
+                        ) as f:
                             quiz_data = json.load(f)
                             all_quizzes.append(quiz_data)
                     except Exception as e:
@@ -89,11 +98,15 @@ async def get_available_chapters(chapterNo: Optional[int] = None):
             all_chapters_data = []
             grammers_dir = "data/grammers"
             if not os.path.exists(grammers_dir):
-                raise HTTPException(status_code=404, detail="Grammar data directory not found.")
+                raise HTTPException(
+                    status_code=404, detail="Grammar data directory not found."
+                )
             for filename in os.listdir(grammers_dir):
                 if filename.endswith(".json"):
                     try:
-                        with open(os.path.join(grammers_dir, filename), "r", encoding="utf-8") as f:
+                        with open(
+                            os.path.join(grammers_dir, filename), "r", encoding="utf-8"
+                        ) as f:
                             chapter_data = json.load(f)
                             all_chapters_data.append(chapter_data)
                     except Exception as e:
@@ -113,4 +126,4 @@ async def get_available_chapters(chapterNo: Optional[int] = None):
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8005)
+    uvicorn.run(app, host=HOST, port=PORT)
