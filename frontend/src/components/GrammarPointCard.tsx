@@ -13,9 +13,10 @@ interface GrammarPoint {
 
 interface GrammarPointCardProps {
   point: GrammarPoint;
+  onExpand?: (point: GrammarPoint) => void; // Optional callback for when a grammar point is expanded
 }
 
-const GrammarPointCard: React.FC<GrammarPointCardProps> = ({ point }) => {
+const GrammarPointCard: React.FC<GrammarPointCardProps> = ({ point, onExpand }) => {
   const createListItem = (label: string, content?: string) => {
     if (!content) return null;
     return (
@@ -66,7 +67,10 @@ const GrammarPointCard: React.FC<GrammarPointCardProps> = ({ point }) => {
     const header = event.currentTarget;
     const grammarPointDiv = header.closest('.grammar-point');
     if (grammarPointDiv) {
-      grammarPointDiv.classList.toggle('expanded');
+      const isExpanded = grammarPointDiv.classList.toggle('expanded');
+      if (isExpanded && onExpand) {
+        onExpand(point); // Call onExpand when the grammar point is expanded
+      }
     }
   };
 

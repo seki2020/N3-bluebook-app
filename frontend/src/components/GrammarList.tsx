@@ -15,9 +15,10 @@ interface GrammarPoint {
 interface GrammarListProps {
   filteredGrammar: GrammarPoint[];
   grammarData: GrammarPoint[];
+  onGrammarPointExpand?: (point: GrammarPoint) => void; // Add onGrammarPointExpand prop
 }
 
-const GrammarList: React.FC<GrammarListProps> = ({ filteredGrammar, grammarData }) => {
+const GrammarList: React.FC<GrammarListProps> = ({ filteredGrammar, grammarData, onGrammarPointExpand }) => {
   return (
     <div id="grammarList">
       {filteredGrammar.length === 0 ? (
@@ -26,7 +27,7 @@ const GrammarList: React.FC<GrammarListProps> = ({ filteredGrammar, grammarData 
         </div>
       ) : (
         filteredGrammar.map((point, index) => (
-          <GrammarPointCard key={index} point={point} />
+          <GrammarPointCard key={index} point={point} onExpand={onGrammarPointExpand} />
         ))
       )}
     </div>

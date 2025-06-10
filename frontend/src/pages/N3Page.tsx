@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import SearchBar from '../components/SearchBar';
 import ChapterFilter from '../components/ChapterFilter';
 import GrammarList from '../components/GrammarList';
+import LogModal from '../components/LogModal'; // Import the new LogModal component
+import type { LogEntry } from '../types/LogEntry'; // Import LogEntry interface as a type
 
 interface GrammarPoint {
   chapter: number;
@@ -103,12 +105,48 @@ const N3Page: React.FC = () => {
     localStorage.setItem('selectedChapter', chapter);
   };
 
+  const handleGrammarPointExpand = useCallback((point: GrammarPoint) => {
+    const logEntry: LogEntry = { // Use LogEntry type
+      id: Date.now(),
+      timestamp: Date.now(), // Use timestamp for sorting
+      type: 'grammar_view',
+      data: {
+        grammarPoint: point.pattern,
+        chapter: point.chapter,
+      },
+    };
+
+    try {
+      const existingLogs = JSON.parse(localStorage.getItem('grammarViewLogs') || '[]') as LogEntry[]; // Use grammarViewLogs
+      // Check if the last expanded grammar point is the same to avoid duplicate logs from rapid clicks
+      if (existingLogs.length > 0 &&
+          existingLogs[existingLogs.length - 1].type === 'grammar_view' &&
+          existingLogs[existingLogs.length - 1].data.grammarPoint === logEntry.data.grammarPoint) {
+        return;
+      }
+      const updatedLogs = [...existingLogs, logEntry];
+      localStorage.setItem('grammarViewLogs', JSON.stringify(updatedLogs)); // Save to grammarViewLogs
+    } catch (error) {
+      console.error('Error saving grammar view log to localStorage:', error);
+    }
+  }, []);
+
+  const [showLogModal, setShowLogModal] = useState(false); // State to control log modal visibility
+
   const handleTryQuiz = () => {
     if (selectedChapter === 'all') {
       alert('请选择一个具体的章节进行测验。');
       return;
     }
     navigate(`/quiz/${selectedChapter}`); // Use React Router for navigation
+  };
+
+  const handleOpenLogModal = () => {
+    setShowLogModal(true);
+  };
+
+  const handleCloseLogModal = () => {
+    setShowLogModal(false);
   };
 
   return (
@@ -128,7 +166,35 @@ const N3Page: React.FC = () => {
         总数: <span id="currentCount">{filteredGrammar.length}</span>
       </div>
 
-      <GrammarList filteredGrammar={filteredGrammar} grammarData={grammarData} />
+      <GrammarList
+        filteredGrammar={filteredGrammar}
+        grammarData={grammarData}
+        onGrammarPointExpand={handleGrammarPointExpand} // Pass the expand handler
+      />
+
+      {import.meta.env.MODE === 'development' && (
+        <button
+          onClick={handleOpenLogModal}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            padding: '10px 20px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '1em',
+            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+            zIndex: 1000,
+          }}
+        >
+          Log
+        </button>
+      )}
+
+      {showLogModal && <LogModal onClose={handleCloseLogModal} />}
     </>
   );
 };
